@@ -1,0 +1,14 @@
+{
+	"colors": {
+		"rocks": [160, 160, 160],
+		"grass": [48, 200, 48],
+		"water": [28, 107, 250]
+	},
+	"paths": {
+		"palette": "palette.png"
+	},
+	"dimensions": {
+		"x": 11,
+		"y": 11
+	}
+}
