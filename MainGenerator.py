@@ -4,7 +4,7 @@ from scipy.ndimage import zoom
 from scipy.interpolate import RectBivariateSpline
 from PIL import Image
 #===========================================================
-import color
+import Terrain
 import Isometric
 import Shader
 import ColorMap
@@ -47,7 +47,7 @@ def makeNormalizedSpecularMap(mapHeight, lightDirection, waterMask):
 	specular_map /= np.max(specular_map)
 	return specular_map
 
-def makeImage(elevation, parameters, *, grass = None, lightDirection = LIGHT_DIR, tileSize = 32):
+def makeImage(elevation, *, palettePath, grass = None, lightDirection = LIGHT_DIR, tileSize = 32, **kwargs):
 	mapHeight = Upscale.upscale_array(elevation)
 	mapHeight2 = zoom(elevation.astype(float), zoom=32, order=1)
 	mask = (mapHeight2 < 0) | (mapHeight == np.nan)
@@ -56,7 +56,7 @@ def makeImage(elevation, parameters, *, grass = None, lightDirection = LIGHT_DIR
 	mask_type_grass = (-0.01 < mask_type) & (mask_type < 0.01)
 	mapHeight *= ~mask_type_grass
 	mapHeight[~mask_type_grass] = warpArray(warpArray(mapHeight), strength=4, scale=4)[~mask_type_grass]
-	mapRGB, grass_mask = color.assignTerrain(mapHeight, colors = parameters["colors"], water_threshold=WATER_LEVEL, grassTexture = grass)
+	mapRGB, grass_mask = Terrain.assignTerrain(mapHeight, water_threshold=WATER_LEVEL, grassTexture = grass, **kwargs)
 	water_mask = mapHeight <= WATER_LEVEL
 	if np.any(water_mask):
 		water_intensity = np.abs(mapHeight * water_mask) + WATER_LEVEL / 4
@@ -73,7 +73,7 @@ def makeImage(elevation, parameters, *, grass = None, lightDirection = LIGHT_DIR
 		lighting[inner(water_mask)] /= np.max(lighting[inner(water_mask)])
 	lighting += 3 * makeNormalizedSpecularMap(mapHeight, lightDirection, water_mask)
 	mapRGB = Shader.applyLighting(mapRGB, lighting)
-	refImage = np.array(Image.open("palette.png").convert("RGB"))
+	refImage = np.array(Image.open(palettePath).convert("RGB"))
 	if grass is None:
 		mapRGB = ColorMap.mapColor(mapRGB, [refImage])
 	else:

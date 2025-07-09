@@ -18,16 +18,17 @@ COLOR_DEFAULT_DICTIONARY = {
 def sigmoid(x):
 	return (1 + (np.exp(x)-np.exp(-x)) / (np.exp(x)+np.exp(-x)))/2
 
-def makeRockTexture(shape, elevation, gradient, threshold):
+def makeRockTexture(shape, elevation, gradient, threshold, *, rockTextureIntensity = 10, **kwargs):
 	rockTexture = np.random.rand(*shape) * 0.15
 	rockTexture -= np.average(rockTexture)
 	rockTexture = gaussian_filter(rockTexture, sigma = 0.75)
-	rockTexture *= 10 * (gradient-threshold) * (gradient>threshold) / np.max(gradient-threshold)
+	rockTexture *= rockTextureIntensity * (gradient-threshold) * (gradient>threshold) / np.max(gradient-threshold)
 	rockTexture *= np.clip(sigmoid( 2 * elevation ) - 0.5, 0, 1)
 	return rockTexture
 
 def assignTerrain(elevation, *, water_threshold=-0.01, slope_threshold=0.25/32, grassTexture = None,
-		colors = None
+		colors = None,
+		**kwargs
 	):
 	if colors is None:
 		colors = COLOR_DEFAULT_DICTIONARY
@@ -46,7 +47,7 @@ def assignTerrain(elevation, *, water_threshold=-0.01, slope_threshold=0.25/32, 
 	maskRocks = ~MaskOperation.removeSmallPools(~maskRocks, 28 ** 2) * ~maskWater & (elevation != 0)
 	maskGrass = ~(maskWater | maskRocks)
 
-	elevation[maskRocks] += makeRockTexture(elevation.shape, elevation, gradient_magnitude, slope_threshold)[maskRocks]
+	elevation[maskRocks] += makeRockTexture(elevation.shape, elevation, gradient_magnitude, slope_threshold, **kwargs)[maskRocks]
 	mapRGB[maskRocks] = colors["rocks"]
 	mapRGB[maskWater] = colors["water"]
 	return mapRGB, maskGrass

@@ -41,8 +41,8 @@ class TileMapMenu(JsonInterface):
 		elevation = np.fliplr(self.getEntryArray())
 		self.imageArray = np.flipud(MainGenerator.makeImage(
 			elevation,
-			self.parameters,
-			grass = self.textureGrass
+			grass = self.textureGrass,
+			**self.parameters,
 		))
 		self.img = ImageTk.PhotoImage(image=Image.fromarray(self.imageArray))
 		self.canvas.itemconfig(self.imageContainer, image=self.img)
