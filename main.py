@@ -76,8 +76,8 @@ class TileMapMenu(JsonInterface):
 		filePath = filedialog.asksaveasfilename(defaultextension = ".png", filetypes=[("PNG files", "*.png")])
 		if not filePath:
 			return
-		img = Image.fromarray(self.array)
-		img.save(file_path)
+		img = Image.fromarray(self.imageArray)
+		img.save(filePath)
 
 	def configImageCanvas(self, master, sizeTile = SIZE_TILE):
 		w, h = self.nX * sizeTile, self.nY * sizeTile
